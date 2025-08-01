@@ -3,7 +3,6 @@ package com.rk.uberApp.entities;
 
 import com.rk.uberApp.entities.enums.PaymentMethod;
 import com.rk.uberApp.entities.enums.PaymentStatus;
-import com.rk.uberApp.entities.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,9 +1,11 @@
 package com.rk.uberApp.utils;
 
 
-import ch.qos.logback.core.CoreConstants;
 import com.rk.uberApp.dtos.PointDto;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 public class GeometryUtils {
 

@@ -2,17 +2,17 @@ package com.rk.uberApp.controllers;
 
 
 import com.rk.uberApp.dtos.RideRequestDto;
-import com.rk.uberApp.dtos.RiderDto;
-import com.rk.uberApp.services.Implementations.RiderServiceImpl;
 import com.rk.uberApp.services.RiderService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/rider")
+@RequestMapping("/riders")
 public class RiderController {
 
     private final RiderService riderService;

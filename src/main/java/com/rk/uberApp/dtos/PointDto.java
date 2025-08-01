@@ -1,6 +1,6 @@
 package com.rk.uberApp.dtos;
 
-import lombok.*;
+import lombok.Data;
 
 
 @Data

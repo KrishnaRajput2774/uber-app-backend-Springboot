@@ -1,6 +1,5 @@
 package com.rk.uberApp.strategies.impl;
 
-import com.rk.uberApp.dtos.RideRequestDto;
 import com.rk.uberApp.entities.RideRequest;
 import com.rk.uberApp.services.DistanceService;
 import com.rk.uberApp.strategies.RideFareCalculationStrategy;
@@ -16,6 +15,6 @@ public class RideFareDefaultFareCalculationStrategy implements RideFareCalculati
     @Override
     public Double calculateFare(RideRequest rideRequest) {
         double distance = distanceService.calculateDistance(rideRequest.getPickUpLocation(),rideRequest.getDropOffLocation());
-        return distance * RIDE_FARE_MULTIPLIYER;
+        return distance  * RIDE_FARE_MULTIPLIYER;
     }
 }

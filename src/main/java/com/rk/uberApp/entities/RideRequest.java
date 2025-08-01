@@ -20,10 +20,10 @@ public class RideRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "Geometry(Point, 4326)")
+    @Column(columnDefinition = "geometry(Point, 4326)")
     private Point pickUpLocation;
 
-    @Column(columnDefinition = "Geometry(Point, 4326)")
+    @Column(columnDefinition = "geometry(Point, 4326)")
     private Point dropOffLocation;
 
     private Double fare;
