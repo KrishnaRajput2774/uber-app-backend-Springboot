@@ -4,6 +4,7 @@ import com.rk.uberApp.dtos.RideRequestDto;
 import com.rk.uberApp.entities.Driver;
 import com.rk.uberApp.entities.Ride;
 import com.rk.uberApp.entities.RideRequest;
+import com.rk.uberApp.entities.Rider;
 import com.rk.uberApp.entities.enums.RideStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,8 +19,8 @@ public interface RideService {
 
     Ride updateRideStatus(Ride Ride, RideStatus rideStatus);
 
-    Page<Ride> getAllRidesOdRider(Long riderId, PageRequest pageRequest);
+    Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest);
 
-    Page<Ride> getAllRidesOdDriver(Long driverId, PageRequest pageRequest);
+    Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest);
 
 }

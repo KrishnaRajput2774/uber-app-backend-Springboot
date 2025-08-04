@@ -19,8 +19,8 @@ public class RiderController {
 
     @PostMapping("/rideRequest")
     public ResponseEntity<RideRequestDto> requestRide(@RequestBody RideRequestDto rideRequestDto) {
-        RideRequestDto ride = riderService.requestRide(rideRequestDto);
-        return ResponseEntity.ok(ride);
+        RideRequestDto rideRequestDto1  = riderService.requestRide(rideRequestDto);
+        return ResponseEntity.ok(rideRequestDto1);
     }
 
 

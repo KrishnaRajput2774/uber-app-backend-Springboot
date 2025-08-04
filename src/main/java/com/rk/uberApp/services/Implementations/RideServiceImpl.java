@@ -4,6 +4,7 @@ import com.rk.uberApp.dtos.RideRequestDto;
 import com.rk.uberApp.entities.Driver;
 import com.rk.uberApp.entities.Ride;
 import com.rk.uberApp.entities.RideRequest;
+import com.rk.uberApp.entities.Rider;
 import com.rk.uberApp.entities.enums.RideRequestStatus;
 import com.rk.uberApp.entities.enums.RideStatus;
 import com.rk.uberApp.exceptions.ResourceNotFoundException;
@@ -16,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
@@ -47,8 +47,7 @@ public class RideServiceImpl implements RideService {
         ride.setOtp(generateOtp());
         ride.setId(null);
 
-        rideRequestService.update( rideRequest);
-
+        rideRequestService.update(rideRequest);
         return rideRepository.save(ride);
     }
 
@@ -61,13 +60,13 @@ public class RideServiceImpl implements RideService {
 
 
     @Override
-    public Page<Ride> getAllRidesOdRider(Long riderId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest) {
+        return rideRepository.findByRider(rider,pageRequest);
     }
 
     @Override
-    public Page<Ride> getAllRidesOdDriver(Long driverId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest) {
+        return rideRepository.findByDriver(driver, pageRequest);
     }
 
     public String generateOtp() {
