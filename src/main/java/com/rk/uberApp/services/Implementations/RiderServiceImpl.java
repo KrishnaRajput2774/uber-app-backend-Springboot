@@ -1,8 +1,6 @@
 package com.rk.uberApp.services.Implementations;
 
-import com.rk.uberApp.dtos.RideDto;
-import com.rk.uberApp.dtos.RideRequestDto;
-import com.rk.uberApp.dtos.RiderDto;
+import com.rk.uberApp.dtos.*;
 import com.rk.uberApp.entities.*;
 import com.rk.uberApp.entities.enums.RideRequestStatus;
 import com.rk.uberApp.entities.enums.RideStatus;
@@ -10,20 +8,24 @@ import com.rk.uberApp.exceptions.ResourceNotFoundException;
 import com.rk.uberApp.repositories.RideRequestRepository;
 import com.rk.uberApp.repositories.RiderRepository;
 import com.rk.uberApp.services.DriverService;
+import com.rk.uberApp.services.RatingService;
 import com.rk.uberApp.services.RideService;
 import com.rk.uberApp.services.RiderService;
 import com.rk.uberApp.strategies.RideStrategyManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RiderServiceImpl implements RiderService {
 
 
@@ -33,6 +35,7 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepository riderRepository;
     private final RideService rideService;
     private final DriverService driverService;
+    private final RatingService ratingService;
 
 
     @Transactional
@@ -59,7 +62,7 @@ public class RiderServiceImpl implements RiderService {
                 .driverMatchStrategy(rider.getRating()).findMatchingDriver(rideRequest);
         //TODO after getting list of driver we will need to send notification to all drivers about requested ride
 
-        return modelMapper.map(savedRideRequest,RideRequestDto.class);
+        return modelMapper.map(savedRideRequest, RideRequestDto.class);
     }
 
     @Override
@@ -67,32 +70,45 @@ public class RiderServiceImpl implements RiderService {
         Rider currentRider = getCurrentRider();
         Ride ride = rideService.getRideById(rideId);
 
-        if( !ride.getRider().equals(currentRider)) {
+        if (!ride.getRider().equals(currentRider)) {
             throw new RuntimeException("Rider does not Owns This ride");
         }
 
-        if(!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
-            throw new RuntimeException("Cannot Cancel Ride "+ride.getRideStatus());
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
+            throw new RuntimeException("Cannot Cancel Ride " + ride.getRideStatus());
         }
 
-        Ride savedRide = rideService.updateRideStatus(ride,RideStatus.CANCELLED);
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
 
         Driver driver = ride.getDriver();
-        Driver savedDriver = driverService.updateDriverAvailability(driver,true);
+        Driver savedDriver = driverService.updateDriverAvailability(driver, true);
 
-        return modelMapper.map(savedRide,RideDto.class);
+        return modelMapper.map(savedRide, RideDto.class);
     }
 
     @Override
-    public RiderDto rateDriver(Long rideId, Integer rating) {
-        return null;
+    public DriverDto rateDriver(Long rideId, Double rating) {
+
+        Ride ride = rideService.getRideById(rideId);
+        Rider rider = getCurrentRider();
+
+        if (!rider.equals(ride.getRider())) {
+            throw new RuntimeException("Cant Rate Driver, Because Rider does not owns this Ride");
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride is NOT ENDED hence cannot Rate Driver, STATUS: " + ride.getRideStatus());
+        }
+
+        return ratingService.rateDriver(ride,rating);
+
     }
 
     @Override
     public RiderDto getMyProfile() {
 
         Rider currentRider = getCurrentRider();
-        return modelMapper.map(currentRider,RiderDto.class);
+        return modelMapper.map(currentRider, RiderDto.class);
 
     }
 
@@ -114,12 +130,15 @@ public class RiderServiceImpl implements RiderService {
                 .rating(0.0)
                 .build();
 
+        log.info("Rider-------> {}",rider.toString());
+
         return riderRepository.save(rider);
     }
 
     @Override
     public Rider getCurrentRider() {
         //TODO currently sending dummy rider
-        return riderRepository.findById(1L).orElseThrow(()->new ResourceNotFoundException("Rider Not Found With id: "+1));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return riderRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Rider Not Associated With User id: " + user.getId()));
     }
 }

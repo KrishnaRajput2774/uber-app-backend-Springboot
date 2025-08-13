@@ -1,15 +1,15 @@
 package com.rk.uberApp.services;
 
-import com.rk.uberApp.dtos.DriverDto;
-import com.rk.uberApp.dtos.SignupDto;
-import com.rk.uberApp.dtos.UserDto;
+import com.rk.uberApp.dtos.*;
 
 public interface AuthService {
 
-    String login( String name, String password);
+    String[] login( String name, String password);
 
     UserDto signup(SignupDto signupDto);
 
-    DriverDto onBoard(Long id);
+    DriverDto onBoardNewDriver(Long userId, VehicleDto vehicleDto);
+
+    String refreshToken(String refreshToken);
 
 }

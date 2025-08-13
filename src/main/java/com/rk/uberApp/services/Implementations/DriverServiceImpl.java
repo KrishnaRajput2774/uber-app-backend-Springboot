@@ -1,24 +1,24 @@
 package com.rk.uberApp.services.Implementations;
 
 import com.rk.uberApp.dtos.DriverDto;
+import com.rk.uberApp.dtos.RatingDto;
 import com.rk.uberApp.dtos.RideDto;
 import com.rk.uberApp.dtos.RiderDto;
 import com.rk.uberApp.entities.Driver;
 import com.rk.uberApp.entities.Ride;
 import com.rk.uberApp.entities.RideRequest;
+import com.rk.uberApp.entities.User;
 import com.rk.uberApp.entities.enums.RideRequestStatus;
 import com.rk.uberApp.entities.enums.RideStatus;
 import com.rk.uberApp.exceptions.ResourceNotFoundException;
 import com.rk.uberApp.repositories.DriverRepository;
 import com.rk.uberApp.repositories.RideRequestRepository;
-import com.rk.uberApp.services.DriverService;
-import com.rk.uberApp.services.PaymentService;
-import com.rk.uberApp.services.RideRequestService;
-import com.rk.uberApp.services.RideService;
+import com.rk.uberApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,6 +33,7 @@ public class DriverServiceImpl implements DriverService {
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
     private final RideRequestRepository rideRequestRepository;
+    private final RatingService ratingService;
 
     @Override
     public RideDto acceptRide(Long rideId) {
@@ -101,6 +102,9 @@ public class DriverServiceImpl implements DriverService {
         //When ride is CONFIRMED and Started then Add Payment
         paymentService.createNewPayment(savedRide);
 
+        //Create Rating
+        ratingService.createRating(ride);
+
         return modelMapper.map(savedRide, RideDto.class);
     }
 
@@ -136,8 +140,21 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public RiderDto rateRider(Long rideId, Integer rating) {
-        return null;
+    public RiderDto rateRider(Long rideId,Double rating) {
+
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if (!driver.equals(ride.getDriver())) {
+            throw new RuntimeException("Cant Rate Rider, Because Driver does not owns this Ride");
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride is NOT ENDED hence cannot be Rate Rider, STATUS: " + ride.getRideStatus());
+        }
+
+          return ratingService.rateRider(ride,rating);
+
     }
 
     @Override
@@ -160,13 +177,20 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Driver getCurrentDriver() {
-        //Returning dummy driver
-        return driverRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Driver not Found with Id: " + 2));
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return driverRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Driver not Associated with User Id: " + user.getId()));
     }
 
     @Override
     public Driver updateDriverAvailability(Driver driver, Boolean available) {
         driver.setAvailable(available);
+        return driverRepository.save(driver);
+    }
+
+    @Override
+    public Driver createNewDriver(Driver driver) {
+
         return driverRepository.save(driver);
     }
 }
